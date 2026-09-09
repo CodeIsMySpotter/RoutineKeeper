@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:RoutineKeeper.Views"
+             xmlns:viewmodels="clr-namespace:RoutineKeeper.ViewModels"
+             xmlns:models="clr-namespace:RoutineKeeper.Models"
+             xmlns:converters="clr-namespace:RoutineKeeper.Converters"
+             x:Class="RoutineKeeper.Views.ChatPage"
+             x:DataType="viewmodels:ChatViewModel"
+             Title="AI Assistant"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+    
+    <ContentPage.Resources>
+        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        
+        <DataTemplate x:Key="UserMessageTemplate" x:DataType="models:ChatMessage">
+            <Border BackgroundColor="{DynamicResource PrimaryAccent}" Padding="16" StrokeThickness="0" StrokeShape="RoundRectangle 24" HorizontalOptions="End" MaximumWidthRequest="280" Margin="0,4">
+                <Label Text="{Binding Text}" TextColor="{DynamicResource White}" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AssistantMessageTemplate" x:DataType="models:ChatMessage">
+            <Border BackgroundColor="{DynamicResource CardBackgroundSecondary}" Padding="16" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 24" HorizontalOptions="Start" MaximumWidthRequest="280" Margin="0,4">
+                <Label Text="{Binding Text}" TextColor="{DynamicResource TextPrimary}" />
+            </Border>
+        </DataTemplate>
+        
+        <DataTemplate x:Key="SystemMessageTemplate" x:DataType="models:ChatMessage">
+            <Border BackgroundColor="Transparent" Padding="16" StrokeThickness="0" HorizontalOptions="Center" Margin="0,4">
+                <Label Text="{Binding Text}" TextColor="{DynamicResource TextSecondary}" FontSize="12" HorizontalTextAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <views:ChatMessageTemplateSelector x:Key="ChatSelector"
+            UserTemplate="{StaticResource UserMessageTemplate}"
+            AssistantTemplate="{StaticResource AssistantMessageTemplate}"
+            SystemTemplate="{StaticResource SystemMessageTemplate}" />
+    </ContentPage.Resources>
+
+    <Grid BackgroundColor="{DynamicResource AppBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="*" />    <!-- Chat messages list -->
+            <RowDefinition Height="Auto" /> <!-- Input -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Spacing="4" Padding="24,60,24,10">
+            <Label Text="AI Assistant" FontSize="32" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" />
+            <Label Text="Describe your perfect day and I'll build a plan for you." 
+                   TextColor="{DynamicResource TextSecondary}" />
+        </VerticalStackLayout>
+        
+        <!-- Chat history -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Messages}" ItemTemplate="{StaticResource ChatSelector}" Margin="24,10,24,100">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+            </CollectionView.ItemsLayout>
+        </CollectionView>
+
+        <!-- Message input bar -->
+        <Border Grid.Row="2" VerticalOptions="End" Margin="24,0,24,100" BackgroundColor="{DynamicResource CardBackgroundSecondary}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 24" Padding="16,4" Shadow="{Shadow Brush={StaticResource Black}, Offset='0,5', Radius=15, Opacity=0.05}">
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                <!-- Attach image -->
+                <Path Grid.Column="0" Data="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" Fill="{DynamicResource PrimaryAccentBrush}" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="24" HeightRequest="24">
+                    <Path.GestureRecognizers>
+                        <TapGestureRecognizer />
+                    </Path.GestureRecognizers>
+                </Path>
+                
+                <Entry Grid.Column="1" Text="{Binding InputText}" Placeholder="Type a message..." BackgroundColor="Transparent" TextColor="{DynamicResource TextPrimary}" PlaceholderColor="{DynamicResource TextSecondary}" VerticalOptions="Center" />
+                <Button Grid.Column="2" Text="↑" Command="{Binding SendMessageCommand}" IsEnabled="{Binding IsTyping, Converter={x:StaticResource InvertedBoolConverter}, FallbackValue=True}" FontSize="20" BackgroundColor="{DynamicResource PrimaryAccent}" TextColor="{DynamicResource White}" CornerRadius="16" WidthRequest="44" HeightRequest="44" Padding="0"/>
+            </Grid>
+        </Border>
+        
+        <!-- Loader when AI is thinking -->
+        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsTyping}" IsVisible="{Binding IsTyping}" Color="{DynamicResource PrimaryAccent}" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,-30,0,0" />
+
+        <!-- Floating Dock (Absolute positioning via Grid rowspan to stay on top) -->
+        <views:FloatingDock Grid.Row="0" Grid.RowSpan="3" ActivePage="Chat" />
+    </Grid>
+</ContentPage>

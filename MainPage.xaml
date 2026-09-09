@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:RoutineKeeper.ViewModels"
+             xmlns:views="clr-namespace:RoutineKeeper.Views"
+             x:Class="RoutineKeeper.MainPage"
+             x:DataType="viewmodels:MainPageViewModel"
+             Title="Dashboard"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <Grid BackgroundColor="{DynamicResource AppBackground}">
+        <ScrollView Padding="0,0,0,100">
+            <VerticalStackLayout Padding="24,40,24,24" Spacing="24">
+            
+            <!-- Modern Headers -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Your day," Style="{StaticResource Headline}" HorizontalOptions="Start" TextColor="{DynamicResource TextPrimary}" />
+                <Label Text="Fully in control." Style="{StaticResource SubHeadline}" HorizontalOptions="Start" TextColor="{DynamicResource PrimaryAccent}" />
+            </VerticalStackLayout>
+
+            <!-- Main Big Card -->
+            <Border BackgroundColor="{DynamicResource CardBackground}" Padding="32" Stroke="{DynamicResource CardBorderColor}" StrokeThickness="1">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="Guaranteed rest time" FontSize="16" TextColor="{DynamicResource TextOnCardSecondary}" />
+                    
+                    <HorizontalStackLayout Spacing="4" VerticalOptions="End">
+                        <Label Text="{Binding RestHours}" FontSize="84" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextOnCardPrimary}" />
+                        <Label Text="h" FontSize="32" TextColor="{DynamicResource TextOnCardSecondary}" VerticalOptions="End" Margin="0,0,12,18"/>
+                        
+                        <Label Text="{Binding RestMinutes, StringFormat='{0:00}'}" FontSize="84" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextOnCardPrimary}" />
+                        <Label Text="m" FontSize="32" TextColor="{DynamicResource TextOnCardSecondary}" VerticalOptions="End" Margin="0,0,0,18"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Statystyki - Siatka -->
+            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto" ColumnSpacing="16" RowSpacing="16">
+                
+                <!-- Kafelek 1 -->
+                <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{DynamicResource PrimaryAccent}" Padding="20" Stroke="{DynamicResource CardBorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 24">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Today" FontSize="12" TextColor="{DynamicResource White}" FontFamily="OpenSansSemibold" Opacity="0.8" />
+                        <Label Text="{Binding TodayTotalTasks}" FontSize="36" FontFamily="OpenSansSemibold" TextColor="{DynamicResource White}" />
+                        <Label Text="Tasks to do" FontSize="14" TextColor="{DynamicResource White}" Opacity="0.8" />
+                    </VerticalStackLayout>
+                </Border>
+                
+                <!-- Kafelek 2 -->
+                <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{DynamicResource CardBackgroundSecondary}" Padding="20" Stroke="{DynamicResource CardBorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 24">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Completed" FontSize="12" TextColor="{DynamicResource TextOnCardSecondary}" FontFamily="OpenSansSemibold" />
+                        <Label Text="{Binding TodayCompletedTasks}" FontSize="36" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextOnCardPrimary}" />
+                        <Label Text="Today's tasks" FontSize="14" TextColor="{DynamicResource TextOnCardSecondary}" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+        <views:FloatingDock ActivePage="Dashboard" />
+    </Grid>
+
+</ContentPage>

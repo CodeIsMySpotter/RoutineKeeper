@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RoutineKeeper.Views.FloatingDock">
+    
+    <Grid InputTransparent="True">
+        
+        <!-- Theme Popup Overlay -->
+        <Grid BackgroundColor="#80000000" IsVisible="{Binding IsThemePopupVisible}" InputTransparent="False" ZIndex="10">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleThemePopupCommand}" />
+            </Grid.GestureRecognizers>
+            
+            <Border BackgroundColor="{DynamicResource CardBackgroundSecondary}" 
+                    Stroke="{DynamicResource BorderColor}" 
+                    StrokeThickness="1" 
+                    StrokeShape="RoundRectangle 24" 
+                    Padding="24" 
+                    WidthRequest="320" 
+                    HorizontalOptions="Center" 
+                    VerticalOptions="Center"
+                    Shadow="{Shadow Brush={StaticResource Black}, Offset='0,10', Radius=20, Opacity=0.25}">
+                
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="Wybierz motyw" FontSize="20" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" HorizontalOptions="Center" Margin="0,0,0,8" />
+                    
+                    <Button Text="Domyślny (Jasny)" Command="{Binding SelectThemeCommand}" CommandParameter="Default"
+                            BackgroundColor="{DynamicResource CardBackground}" TextColor="{DynamicResource TextPrimary}" 
+                            BorderColor="{DynamicResource BorderColor}" BorderWidth="1" CornerRadius="12" />
+                            
+                    <Button Text="Ciemny (Dark)" Command="{Binding SelectThemeCommand}" CommandParameter="Dark"
+                            BackgroundColor="{DynamicResource CardBackground}" TextColor="{DynamicResource TextPrimary}" 
+                            BorderColor="{DynamicResource BorderColor}" BorderWidth="1" CornerRadius="12" />
+                            
+                    <Button Text="Catppuccin Mocha" Command="{Binding SelectThemeCommand}" CommandParameter="Catppuccin"
+                            BackgroundColor="{DynamicResource CardBackground}" TextColor="{DynamicResource TextPrimary}" 
+                            BorderColor="{DynamicResource BorderColor}" BorderWidth="1" CornerRadius="12" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- The Floating Dock itself -->
+        <Border BackgroundColor="{DynamicResource DockBackground}"
+                Margin="20,0,20,20"
+                Padding="12,12"
+                HorizontalOptions="Fill"
+                VerticalOptions="End"
+                Stroke="{DynamicResource CardBorderColor}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 24"
+                InputTransparent="False"
+                ZIndex="5"
+                Shadow="{Shadow Brush={StaticResource Black}, Offset='0,10', Radius=20, Opacity=0.25}">
+            
+            <Grid ColumnDefinitions="*, *, *, *, *">
+                
+                <!-- Chat / AI -->
+                <Border Grid.Column="0" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="44" WidthRequest="44" HorizontalOptions="Center" StrokeShape="RoundRectangle 12" x:Name="ChatBorder">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToChatCommand}" />
+                    </Border.GestureRecognizers>
+                    <Path Data="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" 
+                          Fill="{DynamicResource TextOnCardPrimaryBrush}" 
+                          HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                
+                <!-- Kalendarz -->
+                <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="44" WidthRequest="44" HorizontalOptions="Center" StrokeShape="RoundRectangle 12" x:Name="ScheduleBorder">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToScheduleCommand}" />
+                    </Border.GestureRecognizers>
+                    <Path Data="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm-12-7h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z" 
+                          Fill="{DynamicResource TextOnCardPrimaryBrush}" 
+                          HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                
+                <!-- Dashboard -->
+                <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="44" WidthRequest="44" HorizontalOptions="Center" StrokeShape="RoundRectangle 12" x:Name="DashboardBorder">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToDashboardCommand}" />
+                    </Border.GestureRecognizers>
+                    <Path Data="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z" 
+                          Fill="{DynamicResource TextOnCardPrimaryBrush}" 
+                          HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                
+                <!-- Notes -->
+                <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="44" WidthRequest="44" HorizontalOptions="Center" StrokeShape="RoundRectangle 12" x:Name="NotesBorder">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToNotesCommand}" />
+                    </Border.GestureRecognizers>
+                    <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" 
+                          Fill="{DynamicResource TextOnCardPrimaryBrush}" 
+                          HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+                <!-- Ustawienia (Motyw) -->
+                <Border Grid.Column="4" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="44" WidthRequest="44" HorizontalOptions="Center" StrokeShape="RoundRectangle 12" x:Name="SettingsBorder">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleThemePopupCommand}" />
+                    </Border.GestureRecognizers>
+                    <Path Data="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c.12-.22.07-.49-.12-.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"
+                          Fill="{DynamicResource TextOnCardPrimaryBrush}"
+                          HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+            </Grid>
+        </Border>
+
+    </Grid>
+</ContentView>

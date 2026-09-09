@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:RoutineKeeper.ViewModels"
+             xmlns:models="clr-namespace:RoutineKeeper.Models"
+             xmlns:views="clr-namespace:RoutineKeeper.Views"
+             x:Class="RoutineKeeper.Views.SchedulePage"
+             x:DataType="viewmodels:ScheduleViewModel"
+             x:Name="SchedulePageRoot"
+             Title="Plan Tygodnia"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <Grid BackgroundColor="{DynamicResource AppBackground}">
+        <Grid RowDefinitions="Auto, *, Auto" Margin="0,40,0,100">
+            <!-- 1. Nagłówek -->
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="24,0,24,20">
+                <VerticalStackLayout>
+                    <Label Text="Selected day," FontSize="32" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" />
+                    <Label Text="{Binding SelectedDate, StringFormat='{0:dd MMMM yyyy}'}" TextColor="{DynamicResource TextSecondary}" />
+                </VerticalStackLayout>
+                <!-- Przycisk kalendarza (Otwierający customowy modal) -->
+                <Border Grid.Column="1" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" BackgroundColor="{DynamicResource CardBackgroundSecondary}" WidthRequest="48" HeightRequest="48" StrokeShape="RoundRectangle 24" HorizontalOptions="End" VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleCalendarCommand}" />
+                    </Border.GestureRecognizers>
+                    <Grid>
+                        <Path Data="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z M16 2V6 M8 2V6 M3 10H21" 
+                              Fill="Transparent" Stroke="{DynamicResource PrimaryAccent}" StrokeThickness="2" StrokeLineCap="Round" StrokeLineJoin="Round"
+                              HorizontalOptions="Center" VerticalOptions="Center" InputTransparent="True"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- 2. Lista zaplanowanych aktywności -->
+            <CollectionView Grid.Row="1" ItemsSource="{Binding Activities}" Margin="24,0">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ActivityItem">
+                        <Border BackgroundColor="{DynamicResource CardBackgroundSecondary}" Padding="20" Margin="0,0,0,16" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" Shadow="{Shadow Brush={StaticResource Black}, Offset='0,5', Radius=15, Opacity=0.05}">
+                            <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="8">
+                                    <Border BackgroundColor="{DynamicResource AppBackground}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="10, 4" HorizontalOptions="Start">
+                                        <Label Text="{Binding DayOfWeek}" FontSize="12" TextColor="{DynamicResource PrimaryAccent}" FontFamily="OpenSansSemibold" />
+                                    </Border>
+                                    <Label Text="{Binding Name}" FontSize="20" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" />
+                                </VerticalStackLayout>
+                                
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End" Spacing="0">
+                                    <Label Text="{Binding StartTime}" FontSize="18" FontFamily="OpenSansSemibold" TextColor="{DynamicResource PrimaryAccent}" HorizontalOptions="End" />
+                                    <Label Text="do" FontSize="12" TextColor="{DynamicResource TextSecondary}" HorizontalOptions="End" />
+                                    <Label Text="{Binding EndTime}" FontSize="18" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextSecondary}" HorizontalOptions="End" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="No tasks scheduled. Rest up!" 
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{DynamicResource TextSecondary}" />
+                </CollectionView.EmptyView>
+            </CollectionView>
+
+            <!-- 3. Fixed task adding form at the bottom -->
+            <Border Grid.Row="2" BackgroundColor="{DynamicResource CardBackgroundSecondary}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" Margin="24,10,24,0" Padding="16" StrokeShape="RoundRectangle 24" Shadow="{Shadow Brush={StaticResource Black}, Offset='0,5', Radius=15, Opacity=0.05}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="New Task" FontSize="16" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}"/>
+                    
+                    <Border Stroke="{DynamicResource BorderColor}" StrokeThickness="1" BackgroundColor="{DynamicResource AppBackground}" StrokeShape="RoundRectangle 12" Padding="12,0" HeightRequest="44">
+                        <Entry Placeholder="Title (e.g. Workout)" Text="{Binding NewActivityName}" 
+                               BackgroundColor="Transparent" TextColor="{DynamicResource TextPrimary}" 
+                               PlaceholderColor="{DynamicResource TextSecondary}" VerticalOptions="Center" />
+                    </Border>
+
+                    <Grid ColumnDefinitions="*, 10, *" RowDefinitions="Auto">
+                        <Border Grid.Column="0" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" BackgroundColor="{DynamicResource AppBackground}" StrokeShape="RoundRectangle 12" HeightRequest="44">
+                            <TimePicker BackgroundColor="Transparent" TextColor="{DynamicResource TextPrimary}" Time="12:00:00" 
+                                        HorizontalOptions="Fill" VerticalOptions="Center" 
+                                        HeightRequest="44" />
+                        </Border>
+                        <Label Grid.Column="1" Text="-" VerticalOptions="Center" HorizontalOptions="Center" TextColor="{DynamicResource TextSecondary}" />
+                        <Border Grid.Column="2" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" BackgroundColor="{DynamicResource AppBackground}" StrokeShape="RoundRectangle 12" HeightRequest="44">
+                            <TimePicker BackgroundColor="Transparent" TextColor="{DynamicResource TextPrimary}" Time="13:30:00" 
+                                        HorizontalOptions="Fill" VerticalOptions="Center" 
+                                        HeightRequest="44" />
+                        </Border>
+                    </Grid>
+
+                    <Button Text="Add to schedule" Command="{Binding AddActivityCommand}" BackgroundColor="{DynamicResource PrimaryAccent}" TextColor="{DynamicResource White}" CornerRadius="12" Margin="0,4,0,0" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+        
+        <!-- Floating Dock -->
+        <views:FloatingDock ActivePage="Schedule" />
+        
+        <!-- Kalendarz Popup Overlay -->
+        <Grid BackgroundColor="#80000000" IsVisible="{Binding IsCalendarVisible}" InputTransparent="False">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleCalendarCommand}" />
+            </Grid.GestureRecognizers>
+            
+            <Border BackgroundColor="{DynamicResource CardBackgroundSecondary}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 24" Padding="16" WidthRequest="320" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="{Binding SelectedDate, StringFormat='{0:MMMM yyyy}'}" FontSize="18" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" HorizontalOptions="Center" />
+                    
+                    <Grid ColumnDefinitions="*,*,*,*,*,*,*">
+                        <Label Grid.Column="0" Text="Pn" HorizontalTextAlignment="Center" TextColor="{DynamicResource TextSecondary}" FontSize="12" />
+                        <Label Grid.Column="1" Text="Wt" HorizontalTextAlignment="Center" TextColor="{DynamicResource TextSecondary}" FontSize="12" />
+                        <Label Grid.Column="2" Text="Śr" HorizontalTextAlignment="Center" TextColor="{DynamicResource TextSecondary}" FontSize="12" />
+                        <Label Grid.Column="3" Text="Cz" HorizontalTextAlignment="Center" TextColor="{DynamicResource TextSecondary}" FontSize="12" />
+                        <Label Grid.Column="4" Text="Pt" HorizontalTextAlignment="Center" TextColor="{DynamicResource TextSecondary}" FontSize="12" />
+                        <Label Grid.Column="5" Text="Sb" HorizontalTextAlignment="Center" TextColor="{DynamicResource PrimaryAccent}" FontSize="12" />
+                        <Label Grid.Column="6" Text="Nd" HorizontalTextAlignment="Center" TextColor="{DynamicResource PrimaryAccent}" FontSize="12" />
+                    </Grid>
+                    
+                    <FlexLayout BindableLayout.ItemsSource="{Binding CalendarDays}" Wrap="Wrap" JustifyContent="SpaceBetween" AlignContent="Start">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:CalendarDay">
+                                <Border StrokeThickness="0" BackgroundColor="Transparent" StrokeShape="RoundRectangle 8" WidthRequest="36" HeightRequest="36" Margin="0,0,0,4">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryAccent}" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding BindingContext.SelectDateCommand, Source={x:Reference SchedulePageRoot}}" CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    
+                                    <!-- Logika zacieniania dni z poprzedniego/kolejnego miesiąca -->
+                                    <Label Text="{Binding Date.Day}" FontSize="14" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsCurrentMonth}" Value="False">
+                                                <Setter Property="Opacity" Value="0.3" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="TextColor" Value="{DynamicResource TextOnCardPrimary}" />
+                                            </DataTrigger>
+                                            <MultiTrigger TargetType="Label">
+                                                <MultiTrigger.Conditions>
+                                                    <BindingCondition Binding="{Binding IsSelected}" Value="False" />
+                                                    <BindingCondition Binding="{Binding IsCurrentMonth}" Value="True" />
+                                                </MultiTrigger.Conditions>
+                                                <Setter Property="TextColor" Value="{DynamicResource TextPrimary}" />
+                                            </MultiTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
+
+</ContentPage>

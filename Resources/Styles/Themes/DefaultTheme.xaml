@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- DEFAULT THEME (Jasne tło, fioletowe kafelki i akcenty) -->
+    
+    <Color x:Key="PrimaryAccent">#5E3BEE</Color>
+    <Color x:Key="PrimaryAccentDark">#4925C1</Color>
+    
+    <!-- Tła -->
+    <Color x:Key="AppBackground">#F4F7FC</Color>
+    <Color x:Key="CardBackground">#5E3BEE</Color>
+    <Color x:Key="CardBackgroundSecondary">#FFFFFF</Color>
+    
+    <!-- Ramki -->
+    <Color x:Key="BorderColor">#E6E9F0</Color>
+    <Color x:Key="CardBorderColor">#5230CE</Color>
+
+    <!-- Tekst na głównym tle -->
+    <Color x:Key="TextPrimary">#1B1E32</Color>
+    <Color x:Key="TextSecondary">#8F94A6</Color>
+    
+    <!-- Tekst na fioletowym kafelku -->
+    <Color x:Key="TextOnCardPrimary">#FFFFFF</Color>
+    <Color x:Key="TextOnCardSecondary">#C0AFF9</Color>
+
+    <Color x:Key="DockBackground">#4925C1</Color>
+
+    <!-- Stałe -->
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppBackground}"/>
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource CardBackground}"/>
+    <SolidColorBrush x:Key="CardBackgroundSecondaryBrush" Color="{StaticResource CardBackgroundSecondary}"/>
+    
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}"/>
+    
+    <SolidColorBrush x:Key="TextOnCardPrimaryBrush" Color="{StaticResource TextOnCardPrimary}"/>
+    <SolidColorBrush x:Key="TextOnCardSecondaryBrush" Color="{StaticResource TextOnCardSecondary}"/>
+    
+    <SolidColorBrush x:Key="PrimaryAccentBrush" Color="{StaticResource PrimaryAccent}"/>
+
+</ResourceDictionary>

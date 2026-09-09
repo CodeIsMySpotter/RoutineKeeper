@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Theme Colors (Rocket Jobs Violet UI) -->
+    
+    <!-- Primary Accents -->
+    <Color x:Key="VioletPrimary">#5E3BEE</Color>
+    <Color x:Key="VioletDark">#4925C1</Color>
+    <Color x:Key="VioletLight">#8E71FE</Color>
+    
+    <Color x:Key="CyanAccent">#00E5FF</Color>
+
+    <!-- Dark Context (Dashboard) -->
+    <Color x:Key="DarkAppBackground">#4925C1</Color>
+    <Color x:Key="DarkCardBackground">#6846EB</Color>
+    <Color x:Key="DarkCardHighlight">#7555F2</Color>
+    <Color x:Key="DarkTextPrimary">#FFFFFF</Color>
+    <Color x:Key="DarkTextSecondary">#C0AFF9</Color>
+
+    <!-- Light Context (Schedule) -->
+    <Color x:Key="LightAppBackground">#F4F7FC</Color>
+    <Color x:Key="LightCardBackground">#FFFFFF</Color>
+    <Color x:Key="LightTextPrimary">#1B1E32</Color>
+    <Color x:Key="LightTextSecondary">#8F94A6</Color>
+    
+    <!-- General -->
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+    <Color x:Key="BorderLight">#E6E9F0</Color>
+    <Color x:Key="BorderDark">#5230CE</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="VioletPrimaryBrush" Color="{StaticResource VioletPrimary}"/>
+    <SolidColorBrush x:Key="CyanAccentBrush" Color="{StaticResource CyanAccent}"/>
+    
+    <!-- Context Aware Brushes (Use manually on specific pages) -->
+    <SolidColorBrush x:Key="DarkAppBackgroundBrush" Color="{StaticResource DarkAppBackground}"/>
+    <SolidColorBrush x:Key="DarkCardBackgroundBrush" Color="{StaticResource DarkCardBackground}"/>
+    <SolidColorBrush x:Key="DarkTextPrimaryBrush" Color="{StaticResource DarkTextPrimary}"/>
+    <SolidColorBrush x:Key="DarkTextSecondaryBrush" Color="{StaticResource DarkTextSecondary}"/>
+
+    <SolidColorBrush x:Key="LightAppBackgroundBrush" Color="{StaticResource LightAppBackground}"/>
+    <SolidColorBrush x:Key="LightCardBackgroundBrush" Color="{StaticResource LightCardBackground}"/>
+    <SolidColorBrush x:Key="LightTextPrimaryBrush" Color="{StaticResource LightTextPrimary}"/>
+    <SolidColorBrush x:Key="LightTextSecondaryBrush" Color="{StaticResource LightTextSecondary}"/>
+
+    <!-- Gradients -->
+    <LinearGradientBrush x:Key="VioletGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#5E3BEE" Offset="0.0" />
+        <GradientStop Color="#4925C1" Offset="1.0" />
+    </LinearGradientBrush>
+    
+</ResourceDictionary>
