@@ -23,51 +23,147 @@ public partial class ChatViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsTyping { get; set; } = false;
 
+    [ObservableProperty]
+    public partial string TypingStatus { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial byte[] SelectedImageBytes { get; set; }
+
+    [ObservableProperty]
+    public partial string SelectedImageMimeType { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsImageAttached { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsHistoryVisible { get; set; }
+
+    [ObservableProperty]
+    public partial string CurrentSessionId { get; set; }
+
+    public ObservableCollection<ChatSession> Sessions { get; } = new();
+
     public ChatViewModel(AiAssistantService aiService, AgentActionExecutor actionExecutor, LocalDatabaseService db)
     {
         _aiService = aiService;
         _actionExecutor = actionExecutor;
         _db = db;
 
-        _ = LoadHistoryAsync();
+        _ = InitializeSessionAsync();
     }
 
-    private async Task LoadHistoryAsync()
+    [RelayCommand]
+    private async Task PickImageAsync()
     {
-        var history = await _db.GetChatMessagesForDateAsync(DateTime.Today);
-        if (history.Count == 0)
+        try
         {
-            var welcome = new ChatMessage
+            var customFileType = new Microsoft.Maui.Storage.FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
             {
-                Role = ChatRole.Assistant,
-                Text = "Hey! What are your plans and goals for today?",
-                Timestamp = DateTime.Now
-            };
-            await _db.SaveChatMessageAsync(welcome);
-            Messages.Add(welcome);
-            _aiService.LoadHistory(Messages);
-        }
-        else
-        {
-            foreach (var msg in history)
+                { DevicePlatform.iOS, new[] { "public.image", "com.adobe.pdf", "public.calendar-event", "public.text" } },
+                { DevicePlatform.Android, new[] { "image/*", "application/pdf", "text/calendar", "text/plain" } },
+                { DevicePlatform.WinUI, new[] { ".jpg", ".jpeg", ".png", ".pdf", ".ics", ".txt" } },
+                { DevicePlatform.MacCatalyst, new[] { "public.image", "com.adobe.pdf", "public.calendar-event", "public.text" } },
+            });
+
+            var result = await Microsoft.Maui.Storage.FilePicker.Default.PickAsync(new Microsoft.Maui.Storage.PickOptions
             {
-                Messages.Add(msg);
+                PickerTitle = "Wybierz plik (obraz, PDF, ICS)",
+                FileTypes = customFileType
+            });
+
+            if (result != null)
+            {
+                using var stream = await result.OpenReadAsync();
+                using var ms = new System.IO.MemoryStream();
+                await stream.CopyToAsync(ms);
+                SelectedImageBytes = ms.ToArray();
+                SelectedImageMimeType = result.FileName.EndsWith(".ics", StringComparison.OrdinalIgnoreCase) ? "text/calendar" : result.ContentType;
+                IsImageAttached = true;
             }
-            _aiService.LoadHistory(Messages);
         }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"File picking failed: {ex.Message}");
+        }
+    }
+
+    private async Task InitializeSessionAsync()
+    {
+        var sessions = await _db.GetChatSessionsAsync();
+        Sessions.Clear();
+        foreach (var s in sessions) Sessions.Add(s);
+
+        await CreateNewSessionAsync();
+    }
+
+    [RelayCommand]
+    private async Task CreateNewSessionAsync()
+    {
+        IsHistoryVisible = false;
+        Messages.Clear();
+        
+        var newSession = new ChatSession { Title = $"Sesja z {DateTime.Now:dd.MM HH:mm}" };
+        await _db.SaveChatSessionAsync(newSession);
+        
+        CurrentSessionId = newSession.Id;
+        Sessions.Insert(0, newSession);
+
+        var welcome = new ChatMessage
+        {
+            SessionId = CurrentSessionId,
+            Role = ChatRole.Assistant,
+            Text = "Hej! Jakie masz plany na dzisiaj?",
+            Timestamp = DateTime.Now
+        };
+        await _db.SaveChatMessageAsync(welcome);
+        Messages.Add(welcome);
+        _aiService.LoadHistory(Messages);
+    }
+
+    [RelayCommand]
+    private async Task SelectSessionAsync(ChatSession session)
+    {
+        if (session == null) return;
+        
+        IsHistoryVisible = false;
+        CurrentSessionId = session.Id;
+        Messages.Clear();
+
+        var history = await _db.GetChatMessagesForSessionAsync(session.Id);
+        foreach (var msg in history)
+        {
+            Messages.Add(msg);
+        }
+        _aiService.LoadHistory(Messages);
+    }
+
+    [RelayCommand]
+    private void ToggleHistory()
+    {
+        IsHistoryVisible = !IsHistoryVisible;
     }
 
     [RelayCommand]
     private async Task SendMessageAsync()
     {
-        if (string.IsNullOrWhiteSpace(InputText) || IsTyping) return;
+        if ((string.IsNullOrWhiteSpace(InputText) && !IsImageAttached) || IsTyping) return;
 
-        var userMessage = InputText.Trim();
+        var userMessage = string.IsNullOrWhiteSpace(InputText) ? "[Wysłano obraz]" : InputText.Trim();
         InputText = string.Empty;
+
+        // Save image state locally for the first API call
+        byte[] imageBytes = SelectedImageBytes;
+        string imageMimeType = SelectedImageMimeType;
+        
+        // Clear UI state immediately
+        SelectedImageBytes = null;
+        SelectedImageMimeType = null;
+        IsImageAttached = false;
 
         // Add user message to UI
         var userMsg = new ChatMessage
         {
+            SessionId = CurrentSessionId,
             Role = ChatRole.User,
             Text = userMessage,
             Timestamp = DateTime.Now
@@ -79,41 +175,38 @@ public partial class ChatViewModel : ObservableObject
 
         try
         {
-            // Call AI
-            var jsonResponse = await _aiService.SendMessageAsync(userMessage);
-
-            // Execute background actions (db inserts)
-            await _actionExecutor.ExecuteActionsAsync(jsonResponse);
-
-            // Parse out the conversational reply to show the user
-            string replyText = "I processed your request, but couldn't form a text response.";
-            try
+            TypingStatus = "Analizuję...";
+            
+            var progress = new Action<string>(status => 
             {
-                using var doc = JsonDocument.Parse(jsonResponse);
-                if (doc.RootElement.TryGetProperty("response", out var responseProp))
+                MainThread.BeginInvokeOnMainThread(() => TypingStatus = status);
+            });
+
+            string finalReplyText = await _aiService.SendMessageAsync(
+                userMessage, 
+                imageBytes, 
+                imageMimeType,
+                progress);
+
+            // Show final AI response in UI only if it has text to say
+            if (!string.IsNullOrWhiteSpace(finalReplyText))
+            {
+                var aiMsg = new ChatMessage
                 {
-                    replyText = responseProp.GetString() ?? replyText;
-                }
+                    SessionId = CurrentSessionId,
+                    Role = ChatRole.Assistant,
+                    Text = finalReplyText,
+                    Timestamp = DateTime.Now
+                };
+                await _db.SaveChatMessageAsync(aiMsg);
+                Messages.Add(aiMsg);
             }
-            catch
-            {
-                replyText = "Error parsing AI response format.";
-            }
-
-            // Show AI response in UI
-            var aiMsg = new ChatMessage
-            {
-                Role = ChatRole.Assistant,
-                Text = replyText,
-                Timestamp = DateTime.Now
-            };
-            await _db.SaveChatMessageAsync(aiMsg);
-            Messages.Add(aiMsg);
         }
         catch (Exception ex)
         {
             var sysMsg = new ChatMessage
             {
+                SessionId = CurrentSessionId,
                 Role = ChatRole.System,
                 Text = $"System Error: {ex.Message}",
                 Timestamp = DateTime.Now

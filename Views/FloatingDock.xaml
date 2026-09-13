@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="RoutineKeeper.Views.FloatingDock">
     
-    <Grid InputTransparent="True">
+    <Grid InputTransparent="True" CascadeInputTransparent="False">
         
         <!-- Theme Popup Overlay -->
         <Grid BackgroundColor="#80000000" IsVisible="{Binding IsThemePopupVisible}" InputTransparent="False" ZIndex="10">

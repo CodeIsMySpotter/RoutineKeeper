@@ -46,11 +46,15 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <VerticalStackLayout Grid.Row="0" Spacing="4" Padding="24,60,24,10">
-            <Label Text="AI Assistant" FontSize="32" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" />
-            <Label Text="Describe your perfect day and I'll build a plan for you." 
-                   TextColor="{DynamicResource TextSecondary}" />
-        </VerticalStackLayout>
+        <Grid Grid.Row="0" Padding="24,60,24,10" ColumnDefinitions="*, Auto">
+            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                <Label Text="AI Assistant" FontSize="32" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" />
+                <Label Text="Describe your perfect day and I'll build a plan for you." 
+                       TextColor="{DynamicResource TextSecondary}" />
+            </VerticalStackLayout>
+            
+            <Button Grid.Column="1" Text="⏳" FontSize="24" BackgroundColor="Transparent" TextColor="{DynamicResource TextPrimary}" Command="{Binding ToggleHistoryCommand}" VerticalOptions="Center" WidthRequest="44" HeightRequest="44" Padding="0" />
+        </Grid>
         
         <!-- Chat history -->
         <CollectionView Grid.Row="1" ItemsSource="{Binding Messages}" ItemTemplate="{StaticResource ChatSelector}" Margin="24,10,24,100">
@@ -63,11 +67,14 @@
         <Border Grid.Row="2" VerticalOptions="End" Margin="24,0,24,100" BackgroundColor="{DynamicResource CardBackgroundSecondary}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 24" Padding="16,4" Shadow="{Shadow Brush={StaticResource Black}, Offset='0,5', Radius=15, Opacity=0.05}">
             <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
                 <!-- Attach image -->
-                <Path Grid.Column="0" Data="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" Fill="{DynamicResource PrimaryAccentBrush}" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="24" HeightRequest="24">
-                    <Path.GestureRecognizers>
-                        <TapGestureRecognizer />
-                    </Path.GestureRecognizers>
-                </Path>
+                <Grid Grid.Column="0" WidthRequest="32" HeightRequest="32" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Path Data="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" Fill="{DynamicResource PrimaryAccentBrush}" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="24" HeightRequest="24" />
+                    <!-- Dot indicator when image is attached -->
+                    <Ellipse WidthRequest="10" HeightRequest="10" Fill="#FF3B30" HorizontalOptions="End" VerticalOptions="Start" IsVisible="{Binding IsImageAttached}" />
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PickImageCommand}" />
+                    </Grid.GestureRecognizers>
+                </Grid>
                 
                 <Entry Grid.Column="1" Text="{Binding InputText}" Placeholder="Type a message..." BackgroundColor="Transparent" TextColor="{DynamicResource TextPrimary}" PlaceholderColor="{DynamicResource TextSecondary}" VerticalOptions="Center" />
                 <Button Grid.Column="2" Text="↑" Command="{Binding SendMessageCommand}" IsEnabled="{Binding IsTyping, Converter={x:StaticResource InvertedBoolConverter}, FallbackValue=True}" FontSize="20" BackgroundColor="{DynamicResource PrimaryAccent}" TextColor="{DynamicResource White}" CornerRadius="16" WidthRequest="44" HeightRequest="44" Padding="0"/>
@@ -75,9 +82,46 @@
         </Border>
         
         <!-- Loader when AI is thinking -->
-        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsTyping}" IsVisible="{Binding IsTyping}" Color="{DynamicResource PrimaryAccent}" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,-30,0,0" />
+        <Border Grid.Row="2" IsVisible="{Binding IsTyping}" BackgroundColor="#CC161B22" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 16" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,-40,0,0" Padding="12,6">
+            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                <ActivityIndicator IsRunning="{Binding IsTyping}" Color="{DynamicResource PrimaryAccent}" WidthRequest="16" HeightRequest="16" />
+                <Label Text="{Binding TypingStatus}" TextColor="{DynamicResource TextSecondary}" FontSize="12" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Border>
 
         <!-- Floating Dock (Absolute positioning via Grid rowspan to stay on top) -->
         <views:FloatingDock Grid.Row="0" Grid.RowSpan="3" ActivePage="Chat" />
+
+        <!-- History Overlay -->
+        <Grid Grid.Row="0" Grid.RowSpan="3" BackgroundColor="#E60D1117" IsVisible="{Binding IsHistoryVisible}">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleHistoryCommand}" />
+            </Grid.GestureRecognizers>
+            
+            <Border BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 24" Padding="16" WidthRequest="320" HorizontalOptions="Center" VerticalOptions="Center" MaximumHeightRequest="500">
+                <Grid RowDefinitions="Auto, *, Auto">
+                    <Label Grid.Row="0" Text="Historia Czatów" FontSize="20" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" HorizontalOptions="Center" Margin="0,0,0,16" />
+                    
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding Sessions}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ChatSession">
+                                <Border BackgroundColor="{DynamicResource CardBackgroundSecondary}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="12" Margin="0,4">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ChatViewModel}}, Path=SelectSessionCommand}" CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Title}" TextColor="{DynamicResource TextPrimary}" FontSize="14" FontFamily="OpenSansSemibold" />
+                                        <Label Text="{Binding CreatedAt, StringFormat='{0:dd.MM.yyyy HH:mm}'}" TextColor="{DynamicResource TextSecondary}" FontSize="12" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Button Grid.Row="2" Text="Nowy Czat" Command="{Binding CreateNewSessionCommand}" BackgroundColor="{DynamicResource PrimaryAccent}" TextColor="{DynamicResource White}" CornerRadius="12" Margin="0,16,0,0" />
+                </Grid>
+            </Border>
+        </Grid>
+
     </Grid>
 </ContentPage>

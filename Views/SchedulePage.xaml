@@ -61,8 +61,8 @@
                 </CollectionView.EmptyView>
             </CollectionView>
 
-            <!-- 3. Fixed task adding form at the bottom -->
-            <Border Grid.Row="2" BackgroundColor="{DynamicResource CardBackgroundSecondary}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" Margin="24,10,24,0" Padding="16" StrokeShape="RoundRectangle 24" Shadow="{Shadow Brush={StaticResource Black}, Offset='0,5', Radius=15, Opacity=0.05}">
+            <!-- 3. Fixed task adding form at the bottom (Hidden by default) -->
+            <Border Grid.Row="2" IsVisible="{Binding IsAddTaskVisible}" BackgroundColor="{DynamicResource CardBackgroundSecondary}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" Margin="24,10,24,0" Padding="16" StrokeShape="RoundRectangle 24" Shadow="{Shadow Brush={StaticResource Black}, Offset='0,5', Radius=15, Opacity=0.05}">
                 <VerticalStackLayout Spacing="12">
                     <Label Text="New Task" FontSize="16" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}"/>
                     
@@ -94,6 +94,16 @@
         <!-- Floating Dock -->
         <views:FloatingDock ActivePage="Schedule" />
         
+        <!-- FAB to toggle Add Task form -->
+        <Border BackgroundColor="{DynamicResource PrimaryAccent}" StrokeThickness="0" WidthRequest="56" HeightRequest="56" StrokeShape="RoundRectangle 28" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,24,120" Shadow="{Shadow Brush={StaticResource Black}, Offset='0,4', Radius=10, Opacity=0.2}">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleAddTaskCommand}" />
+            </Border.GestureRecognizers>
+            <Grid>
+                <Path Data="M12 5V19 M5 12H19" Stroke="{DynamicResource White}" StrokeThickness="3" StrokeLineCap="Round" HorizontalOptions="Center" VerticalOptions="Center" InputTransparent="True" />
+            </Grid>
+        </Border>
+        
         <!-- Kalendarz Popup Overlay -->
         <Grid BackgroundColor="#80000000" IsVisible="{Binding IsCalendarVisible}" InputTransparent="False">
             <Grid.GestureRecognizers>
@@ -102,7 +112,28 @@
             
             <Border BackgroundColor="{DynamicResource CardBackgroundSecondary}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 24" Padding="16" WidthRequest="320" HorizontalOptions="Center" VerticalOptions="Center">
                 <VerticalStackLayout Spacing="16">
-                    <Label Text="{Binding SelectedDate, StringFormat='{0:MMMM yyyy}'}" FontSize="18" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" HorizontalOptions="Center" />
+                    
+                    <!-- Header kalendarza z nawigacją -->
+                    <Grid ColumnDefinitions="40, *, 40" Padding="0,0,0,8">
+                        <!-- Poprzedni miesiąc -->
+                        <Border Grid.Column="0" BackgroundColor="Transparent" StrokeThickness="0" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding PreviousMonthCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="&#x25C0;" FontSize="18" TextColor="{DynamicResource PrimaryAccent}" />
+                        </Border>
+                        
+                        <!-- Aktualny miesiąc -->
+                        <Label Grid.Column="1" Text="{Binding CurrentMonthDate, StringFormat='{0:MMMM yyyy}'}" FontSize="18" FontFamily="OpenSansSemibold" TextColor="{DynamicResource TextPrimary}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        
+                        <!-- Następny miesiąc -->
+                        <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NextMonthCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="&#x25B6;" FontSize="18" TextColor="{DynamicResource PrimaryAccent}" />
+                        </Border>
+                    </Grid>
                     
                     <Grid ColumnDefinitions="*,*,*,*,*,*,*">
                         <Label Grid.Column="0" Text="Pn" HorizontalTextAlignment="Center" TextColor="{DynamicResource TextSecondary}" FontSize="12" />

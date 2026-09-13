@@ -16,6 +16,9 @@ public class ChatMessage
     public int Id { get; set; }
 
     [Indexed]
+    public string SessionId { get; set; } = string.Empty;
+
+    [Indexed]
     public DateTime Date { get; set; } = DateTime.Today;
 
     public ChatRole Role { get; set; }

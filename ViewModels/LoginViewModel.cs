@@ -27,34 +27,45 @@ public partial class LoginViewModel : ObservableObject
 
         try
         {
-            var token = await _authService.LoginAsync();
+            var token = await Task.Run(async () => await _authService.LoginAsync());
 
-            if (!string.IsNullOrEmpty(token))
+            Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
             {
-                // Persist the token across sessions
-                Preferences.Set("AuthToken", token);
-
-                // Navigate to the main app
-                await Shell.Current.GoToAsync("///MainPage");
-            }
-            else
-            {
-                await ShowError("Sign-in failed. Please try again.");
-            }
+                try
+                {
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        Preferences.Set("AuthToken", token);
+                        Application.Current.MainPage = new AppShell();
+                    }
+                    else
+                    {
+                        await ShowError("Sign-in failed. Please try again.");
+                    }
+                }
+                catch (Exception navEx)
+                {
+                    await ShowError($"Navigation error: {navEx.Message}");
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            });
         }
         catch (Exception ex)
         {
-            await ShowError($"Unexpected error: {ex.Message}");
-        }
-        finally
-        {
-            IsBusy = false;
+            Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await ShowError($"Unexpected error: {ex.Message}");
+                IsBusy = false;
+            });
         }
     }
 
     private static async Task ShowError(string message)
     {
         if (Application.Current?.MainPage != null)
-            await Application.Current.MainPage.DisplayAlert("Sign-in Error", message, "OK");
+            await Application.Current.Windows[0].Page.DisplayAlert("Sign-in Error", message, "OK");
     }
 }

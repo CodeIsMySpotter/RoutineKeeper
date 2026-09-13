@@ -33,8 +33,8 @@ public class ThemeService
 
     private static readonly Dictionary<string, string> DarkColors = new()
     {
-        ["PrimaryAccent"]              = "#5E3BEE",
-        ["PrimaryAccentDark"]          = "#4925C1",
+        ["PrimaryAccent"]              = "#238636", // Soothing green
+        ["PrimaryAccentDark"]          = "#1A6428",
         ["AppBackground"]              = "#0D1117",
         ["CardBackground"]             = "#161B22",
         ["CardBackgroundSecondary"]    = "#161B22",
@@ -43,7 +43,7 @@ public class ThemeService
         ["TextPrimary"]                = "#E6EDF3",
         ["TextSecondary"]              = "#8B949E",
         ["TextOnCardPrimary"]          = "#FFFFFF",
-        ["TextOnCardSecondary"]        = "#C0AFF9",
+        ["TextOnCardSecondary"]        = "#A3E3B6",
         ["DockBackground"]             = "#161B22",
         ["White"]                      = "#FFFFFF",
         ["Black"]                      = "#000000",

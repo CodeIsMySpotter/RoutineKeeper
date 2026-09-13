@@ -4,7 +4,7 @@ namespace RoutineKeeper;
 
 public partial class App : Application
 {
-	public App(RoutineKeeper.Services.ThemeService themeService)
+	public App(RoutineKeeper.Services.ThemeService themeService, IServiceProvider serviceProvider)
 	{
 		InitializeComponent();
 		
@@ -14,11 +14,20 @@ public partial class App : Application
 		{
 			themeService.InitializeTheme();
 		});
+
+        if (Preferences.ContainsKey("AuthToken"))
+        {
+            MainPage = new AppShell();
+        }
+        else
+        {
+            MainPage = serviceProvider.GetRequiredService<RoutineKeeper.Views.LoginPage>();
+        }
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
-		var window = new Window(new AppShell());
+		var window = new Window(MainPage);
 		
 		var displayInfo = DeviceDisplay.MainDisplayInfo;
 		var screenHeight = displayInfo.Height / displayInfo.Density;

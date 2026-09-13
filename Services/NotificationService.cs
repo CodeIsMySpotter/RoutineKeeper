@@ -41,7 +41,7 @@ public class NotificationService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to show Windows Toast: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Failed to show Windows Toast: {ex.Message}");
         }
 #endif
     }

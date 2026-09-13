@@ -21,18 +21,23 @@ public partial class FloatingDock : ContentView
     {
         if (bindable is FloatingDock dock && newValue is string page)
         {
-            dock.ChatBorder.BackgroundColor = Colors.Transparent;
-            dock.ScheduleBorder.BackgroundColor = Colors.Transparent;
-            dock.DashboardBorder.BackgroundColor = Colors.Transparent;
-            dock.NotesBorder.BackgroundColor = Colors.Transparent;
-            dock.SettingsBorder.BackgroundColor = Colors.Transparent;
+            var transparentColor = Colors.Transparent;
+            dock.ChatBorder.BackgroundColor = transparentColor;
+            dock.ScheduleBorder.BackgroundColor = transparentColor;
+            dock.DashboardBorder.BackgroundColor = transparentColor;
+            dock.NotesBorder.BackgroundColor = transparentColor;
+            dock.SettingsBorder.BackgroundColor = transparentColor;
 
-            var activeColor = Color.FromArgb("#33FFFFFF");
+            dock.ChatBorder.RemoveDynamicResource(Border.BackgroundColorProperty);
+            dock.ScheduleBorder.RemoveDynamicResource(Border.BackgroundColorProperty);
+            dock.DashboardBorder.RemoveDynamicResource(Border.BackgroundColorProperty);
+            dock.NotesBorder.RemoveDynamicResource(Border.BackgroundColorProperty);
+            dock.SettingsBorder.RemoveDynamicResource(Border.BackgroundColorProperty);
 
-            if (page == "Chat") dock.ChatBorder.BackgroundColor = activeColor;
-            else if (page == "Schedule") dock.ScheduleBorder.BackgroundColor = activeColor;
-            else if (page == "Dashboard") dock.DashboardBorder.BackgroundColor = activeColor;
-            else if (page == "Notes") dock.NotesBorder.BackgroundColor = activeColor;
+            if (page == "Chat") dock.ChatBorder.SetDynamicResource(Border.BackgroundColorProperty, "PrimaryAccent");
+            else if (page == "Schedule") dock.ScheduleBorder.SetDynamicResource(Border.BackgroundColorProperty, "PrimaryAccent");
+            else if (page == "Dashboard") dock.DashboardBorder.SetDynamicResource(Border.BackgroundColorProperty, "PrimaryAccent");
+            else if (page == "Notes") dock.NotesBorder.SetDynamicResource(Border.BackgroundColorProperty, "PrimaryAccent");
         }
     }
 
@@ -59,10 +64,10 @@ public partial class FloatingDock : ContentView
     {
         InitializeComponent();
 
-        GoToChatCommand = new Command(async () => await Shell.Current.GoToAsync("///ChatPage"));
-        GoToScheduleCommand = new Command(async () => await Shell.Current.GoToAsync("///SchedulePage"));
-        GoToDashboardCommand = new Command(async () => await Shell.Current.GoToAsync("///MainPage"));
-        GoToNotesCommand = new Command(async () => await Shell.Current.GoToAsync("///NotesPage"));
+        GoToChatCommand = new Command(async () => await SafeNavigateAsync("//ChatPage"));
+        GoToScheduleCommand = new Command(async () => await SafeNavigateAsync("//SchedulePage"));
+        GoToDashboardCommand = new Command(async () => await SafeNavigateAsync("//MainPage"));
+        GoToNotesCommand = new Command(async () => await SafeNavigateAsync("//NotesPage"));
 
         var themeService = IPlatformApplication.Current?.Services.GetService<ThemeService>();
 
@@ -86,5 +91,20 @@ public partial class FloatingDock : ContentView
         });
 
         BindingContext = this;
+    }
+
+    private async Task SafeNavigateAsync(string route)
+    {
+        try
+        {
+            await Shell.Current.GoToAsync(route);
+        }
+        catch (Exception ex)
+        {
+            if (Application.Current?.MainPage != null)
+            {
+                await Application.Current.Windows[0].Page.DisplayAlert("Navigation Error", ex.Message, "OK");
+            }
+        }
     }
 }

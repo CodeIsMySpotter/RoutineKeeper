@@ -1,4 +1,4 @@
-﻿namespace RoutineKeeper;
+namespace RoutineKeeper;
 
 public partial class AppShell : Shell
 {

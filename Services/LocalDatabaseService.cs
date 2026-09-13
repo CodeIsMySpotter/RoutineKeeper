@@ -20,6 +20,7 @@ public class LocalDatabaseService
         
         await _database.CreateTableAsync<ActivityItem>();
         await _database.CreateTableAsync<NoteItem>();
+        await _database.CreateTableAsync<ChatSession>();
         await _database.CreateTableAsync<ChatMessage>();
     }
 
@@ -40,6 +41,19 @@ public class LocalDatabaseService
         return all.Where(a => a.Date.Date == date.Date).ToList();
     }
 
+    public async Task<ActivityItem?> GetActivityByIdAsync(int id)
+    {
+        await InitAsync();
+        return await _database!.Table<ActivityItem>().FirstOrDefaultAsync(a => a.Id == id);
+    }
+
+    public async Task<List<ActivityItem>> GetActivitiesForDateRangeAsync(System.DateTime start, System.DateTime end)
+    {
+        await InitAsync();
+        var all = await _database!.Table<ActivityItem>().ToListAsync();
+        return all.Where(a => a.Date.Date >= start.Date && a.Date.Date <= end.Date).ToList();
+    }
+
     public async Task<int> SaveActivityAsync(ActivityItem item)
     {
         await InitAsync();
@@ -57,6 +71,12 @@ public class LocalDatabaseService
     {
         await InitAsync();
         return await _database!.DeleteAsync(item);
+    }
+
+    public async Task<int> DeleteAllActivitiesAsync()
+    {
+        await InitAsync();
+        return await _database!.DeleteAllAsync<ActivityItem>();
     }
 
     // --- NOTE CRUD ---
@@ -86,13 +106,47 @@ public class LocalDatabaseService
         return await _database!.DeleteAsync(item);
     }
 
+    // --- CHAT SESSION CRUD ---
+
+    public async Task<List<ChatSession>> GetChatSessionsAsync()
+    {
+        await InitAsync();
+        return await _database!.Table<ChatSession>().OrderByDescending(s => s.CreatedAt).ToListAsync();
+    }
+
+    public async Task<int> SaveChatSessionAsync(ChatSession item)
+    {
+        await InitAsync();
+        var existing = await _database!.Table<ChatSession>().FirstOrDefaultAsync(s => s.Id == item.Id);
+        if (existing != null)
+        {
+            return await _database!.UpdateAsync(item);
+        }
+        else
+        {
+            return await _database!.InsertAsync(item);
+        }
+    }
+
+    public async Task<int> DeleteChatSessionAsync(ChatSession item)
+    {
+        await InitAsync();
+        // optionally delete messages for this session
+        var messages = await GetChatMessagesForSessionAsync(item.Id);
+        foreach (var msg in messages)
+        {
+            await _database!.DeleteAsync(msg);
+        }
+        return await _database!.DeleteAsync(item);
+    }
+
     // --- CHAT MESSAGE CRUD ---
 
-    public async Task<List<ChatMessage>> GetChatMessagesForDateAsync(System.DateTime date)
+    public async Task<List<ChatMessage>> GetChatMessagesForSessionAsync(string sessionId)
     {
         await InitAsync();
         var all = await _database!.Table<ChatMessage>().ToListAsync();
-        return all.Where(m => m.Date.Date == date.Date).OrderBy(m => m.Timestamp).ToList();
+        return all.Where(m => m.SessionId == sessionId).OrderBy(m => m.Timestamp).ToList();
     }
 
     public async Task<int> SaveChatMessageAsync(ChatMessage item)

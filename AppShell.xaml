@@ -7,17 +7,16 @@
     xmlns:views="clr-namespace:RoutineKeeper.Views"
     Title="RoutineKeeper">
 
-    <ShellContent Route="LoginPage" ContentTemplate="{DataTemplate views:LoginPage}" />
 
     <TabBar>
+        <Tab Title="Dashboard">
+            <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" />
+        </Tab>
         <Tab Title="Chat">
             <ShellContent ContentTemplate="{DataTemplate views:ChatPage}" Route="ChatPage" />
         </Tab>
         <Tab Title="Planner">
             <ShellContent ContentTemplate="{DataTemplate views:SchedulePage}" Route="SchedulePage" />
-        </Tab>
-        <Tab Title="Dashboard">
-            <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" />
         </Tab>
         <Tab Title="Notes">
             <ShellContent ContentTemplate="{DataTemplate views:NotesPage}" Route="NotesPage" />

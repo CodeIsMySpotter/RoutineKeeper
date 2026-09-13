@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RoutineKeeper.Models;
+using CommunityToolkit.Mvvm.Messaging;
+using RoutineKeeper.Messages;
 using RoutineKeeper.Services;
 using System.Threading.Tasks;
 
@@ -23,8 +25,15 @@ public partial class ScheduleViewModel : ObservableObject
     [ObservableProperty]
     public partial ObservableCollection<CalendarDay> CalendarDays { get; set; } = new();
 
+    [ObservableProperty]
+    public partial System.DateTime CurrentMonthDate { get; set; } = System.DateTime.Today;
+
+    [ObservableProperty]
+    public partial bool IsAddTaskVisible { get; set; } = false;
+
     partial void OnSelectedDateChanged(System.DateTime value)
     {
+        CurrentMonthDate = value;
         GenerateCalendar();
         LoadActivitiesAsync().ConfigureAwait(false);
     }
@@ -35,8 +44,29 @@ public partial class ScheduleViewModel : ObservableObject
         IsCalendarVisible = !IsCalendarVisible;
         if (IsCalendarVisible)
         {
+            CurrentMonthDate = SelectedDate;
             GenerateCalendar();
         }
+    }
+
+    [RelayCommand]
+    private void ToggleAddTask()
+    {
+        IsAddTaskVisible = !IsAddTaskVisible;
+    }
+
+    [RelayCommand]
+    private void NextMonth()
+    {
+        CurrentMonthDate = CurrentMonthDate.AddMonths(1);
+        GenerateCalendar();
+    }
+
+    [RelayCommand]
+    private void PreviousMonth()
+    {
+        CurrentMonthDate = CurrentMonthDate.AddMonths(-1);
+        GenerateCalendar();
     }
 
     [RelayCommand]
@@ -50,8 +80,8 @@ public partial class ScheduleViewModel : ObservableObject
     private void GenerateCalendar()
     {
         CalendarDays.Clear();
-        var firstDayOfMonth = new DateTime(SelectedDate.Year, SelectedDate.Month, 1);
-        int daysInMonth = DateTime.DaysInMonth(SelectedDate.Year, SelectedDate.Month);
+        var firstDayOfMonth = new DateTime(CurrentMonthDate.Year, CurrentMonthDate.Month, 1);
+        int daysInMonth = DateTime.DaysInMonth(CurrentMonthDate.Year, CurrentMonthDate.Month);
         
         // Oblicz od którego dnia tygodnia zaczynamy (Poniedziałek = 1)
         int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
@@ -65,7 +95,7 @@ public partial class ScheduleViewModel : ObservableObject
             CalendarDays.Add(new CalendarDay
             {
                 Date = currentDate,
-                IsCurrentMonth = currentDate.Month == SelectedDate.Month,
+                IsCurrentMonth = currentDate.Month == CurrentMonthDate.Month,
                 IsSelected = currentDate.Date == SelectedDate.Date,
                 IsToday = currentDate.Date == DateTime.Today
             });
@@ -76,12 +106,19 @@ public partial class ScheduleViewModel : ObservableObject
     public ScheduleViewModel(LocalDatabaseService databaseService)
     {
         _databaseService = databaseService;
+        WeakReferenceMessenger.Default.Register<ScheduleChangedMessage>(this, (r, m) =>
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await LoadActivitiesAsync();
+            });
+        });
     }
 
     [RelayCommand]
     private async Task LoadActivitiesAsync()
     {
-        var items = await _databaseService.GetActivitiesAsync();
+        var items = await _databaseService.GetActivitiesForDateAsync(SelectedDate);
         Activities.Clear();
         foreach (var item in items)
         {
